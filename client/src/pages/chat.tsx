@@ -25,11 +25,22 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showTosDialog, setShowTosDialog] = useState(false);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    const accepted = localStorage.getItem("tos-accepted");
+    if (accepted === "true") {
+      setTosAccepted(true);
+    } else {
+      setShowTosDialog(true);
+    }
+  }, []);
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({
@@ -60,8 +71,27 @@ export default function ChatPage() {
     setShowScrollButton(!isNearBottom && messages.length > 0);
   };
 
+  const handleAcceptTos = () => {
+    localStorage.setItem("tos-accepted", "true");
+    setTosAccepted(true);
+    setShowTosDialog(false);
+    toast({
+      title: "Terms Accepted",
+      description: "You can now use JustAskIT.",
+    });
+  };
+
+  const handleDeclineTos = () => {
+    setShowTosDialog(false);
+    toast({
+      title: "Terms Declined",
+      description: "You must accept the Terms of Service to use this application.",
+      variant: "destructive",
+    });
+  };
+
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !tosAccepted) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -181,6 +211,23 @@ export default function ChatPage() {
       minute: "2-digit",
     });
   };
+
+  if (!tosAccepted && !showTosDialog) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background p-4">
+        <Bot className="h-16 w-16 text-primary mb-4" />
+        <h2 className="text-2xl font-semibold mb-2 text-foreground">
+          Terms Required
+        </h2>
+        <p className="text-muted-foreground mb-6 text-center max-w-md">
+          You must accept the Terms of Service to use JustAskIT.
+        </p>
+        <Button onClick={() => setShowTosDialog(true)} data-testid="button-show-tos">
+          Review Terms of Service
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -381,15 +428,15 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything..."
+              placeholder={tosAccepted ? "Ask me anything..." : "Accept Terms of Service to use this app"}
               className="min-h-[60px] max-h-[200px] resize-none rounded-2xl text-base flex-1"
               rows={3}
-              disabled={isLoading}
+              disabled={isLoading || !tosAccepted}
               data-testid="input-message"
             />
             <Button
               onClick={handleSend}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || !tosAccepted}
               size="icon"
               className="h-10 w-10 rounded-xl flex-shrink-0"
               data-testid="button-send"
@@ -418,6 +465,110 @@ export default function ChatPage() {
             <AlertDialogCancel data-testid="button-cancel-clear">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleClearChat} data-testid="button-confirm-clear">
               Clear
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Terms of Service Dialog */}
+      <AlertDialog open={showTosDialog} onOpenChange={(open) => !open && handleDeclineTos()}>
+        <AlertDialogContent className="rounded-3xl max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl">Terms of Service</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Please read and accept these terms to use JustAskIT
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="overflow-y-auto flex-1 pr-4 my-4">
+            <div className="space-y-4 text-sm text-foreground">
+              <section>
+                <h3 className="font-semibold text-base mb-2">1. Acceptance of Terms</h3>
+                <p className="text-muted-foreground">
+                  By accessing and using JustAskIT, you acknowledge that you have read, understood, 
+                  and agree to be bound by these Terms of Service. If you do not agree to these terms, 
+                  you may not use this application.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">2. AI-Generated Content Disclaimer</h3>
+                <p className="text-muted-foreground mb-2">
+                  JustAskIT uses an uncensored artificial intelligence model. You acknowledge and agree that:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+                  <li>The AI may generate content that is inaccurate, offensive, harmful, or inappropriate</li>
+                  <li>The AI responses do not represent the views or opinions of the service provider</li>
+                  <li>You use the AI-generated content entirely at your own risk</li>
+                  <li>The service provider makes no warranties about the accuracy, reliability, or appropriateness of any AI responses</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">3. No Liability</h3>
+                <p className="text-muted-foreground mb-2">
+                  The owner and operator of JustAskIT ("Saim") shall not be held liable for:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-4">
+                  <li>Any content generated by the AI system</li>
+                  <li>Any actions taken based on AI-generated responses</li>
+                  <li>Any damages, losses, or harm resulting from use of this service</li>
+                  <li>Any offensive, illegal, or harmful content produced by the AI</li>
+                  <li>Any decisions made based on information provided by the AI</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">4. User Responsibility</h3>
+                <p className="text-muted-foreground">
+                  You are solely responsible for how you use this service and any AI-generated content. 
+                  You agree to verify any important information independently and not to rely solely on 
+                  AI responses for critical decisions. You will not hold the service provider responsible 
+                  for any consequences arising from your use of this application.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">5. No Professional Advice</h3>
+                <p className="text-muted-foreground">
+                  JustAskIT does not provide professional advice of any kind, including but not limited to 
+                  legal, medical, financial, or therapeutic advice. Any information provided by the AI should 
+                  not be considered professional advice.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">6. Indemnification</h3>
+                <p className="text-muted-foreground">
+                  You agree to indemnify and hold harmless Saim and JustAskIT from any claims, damages, 
+                  losses, or expenses arising from your use of this service or any AI-generated content.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">7. Service Provided "As Is"</h3>
+                <p className="text-muted-foreground">
+                  This service is provided on an "as is" and "as available" basis without any warranties 
+                  of any kind, either express or implied. The service provider disclaims all warranties, 
+                  including but not limited to merchantability, fitness for a particular purpose, and 
+                  non-infringement.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-base mb-2">8. Changes to Terms</h3>
+                <p className="text-muted-foreground">
+                  These terms may be modified at any time. Continued use of the service constitutes 
+                  acceptance of any modified terms.
+                </p>
+              </section>
+            </div>
+          </div>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel onClick={handleDeclineTos} data-testid="button-decline-tos">
+              Decline
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleAcceptTos} data-testid="button-accept-tos">
+              I Accept the Terms of Service
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
