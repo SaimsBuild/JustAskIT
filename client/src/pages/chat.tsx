@@ -25,22 +25,13 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [showTosDialog, setShowTosDialog] = useState(false);
+  const [showTosDialog, setShowTosDialog] = useState(true);
   const [tosAccepted, setTosAccepted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-
-  useEffect(() => {
-    const accepted = localStorage.getItem("tos-accepted");
-    if (accepted === "true") {
-      setTosAccepted(true);
-    } else {
-      setShowTosDialog(true);
-    }
-  }, []);
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({
@@ -72,7 +63,6 @@ export default function ChatPage() {
   };
 
   const handleAcceptTos = () => {
-    localStorage.setItem("tos-accepted", "true");
     setTosAccepted(true);
     setShowTosDialog(false);
     toast({
