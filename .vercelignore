@@ -1,0 +1,11 @@
+node_modules
+.git
+.replit
+.config
+replit.nix
+.env
+.env.local
+*.log
+server/
+design_guidelines.md
+replit.md
