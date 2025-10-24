@@ -1,5 +1,5 @@
 import express, { type Request, Response } from "express";
-import { chatRequestSchema } from "./schema";
+import { chatRequestSchema } from "./schema.js";
 
 const app = express();
 
