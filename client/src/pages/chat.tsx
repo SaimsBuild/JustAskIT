@@ -375,14 +375,14 @@ export default function ChatPage() {
       {/* Input Area */}
       <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto max-w-4xl p-3 sm:p-4">
-          <div className="relative">
+          <div className="flex gap-2 items-end">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask me anything..."
-              className="min-h-[60px] max-h-[200px] resize-none rounded-2xl pr-12 sm:pr-14 text-base"
+              className="min-h-[60px] max-h-[200px] resize-none rounded-2xl text-base flex-1"
               rows={3}
               disabled={isLoading}
               data-testid="input-message"
@@ -391,11 +391,16 @@ export default function ChatPage() {
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
               size="icon"
-              className="absolute right-2 bottom-2 h-10 w-10 rounded-xl"
+              className="h-10 w-10 rounded-xl flex-shrink-0"
               data-testid="button-send"
             >
               <Send className="h-5 w-5" />
             </Button>
+          </div>
+          <div className="mt-2 text-center">
+            <p className="text-xs text-muted-foreground" data-testid="text-built-by">
+              Built by Saim
+            </p>
           </div>
         </div>
       </div>
