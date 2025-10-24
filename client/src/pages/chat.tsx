@@ -461,7 +461,7 @@ export default function ChatPage() {
       </AlertDialog>
 
       {/* Terms of Service Dialog */}
-      <AlertDialog open={showTosDialog} onOpenChange={(open) => !open && handleDeclineTos()}>
+      <AlertDialog open={showTosDialog} onOpenChange={setShowTosDialog}>
         <AlertDialogContent className="rounded-3xl max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl">Terms of Service</AlertDialogTitle>
