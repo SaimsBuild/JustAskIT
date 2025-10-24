@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Bot, User, Send, Trash2, ArrowDown } from "lucide-react";
+import { Bot, User, Send, Trash2, ArrowDown, Moon, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/theme-provider";
 import type { Message } from "@shared/schema";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -28,6 +29,7 @@ export default function ChatPage() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({
@@ -184,26 +186,53 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto h-full px-4 flex items-center justify-between max-w-4xl">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground" data-testid="text-app-title">
+        <div className="container mx-auto h-full px-3 sm:px-4 flex items-center justify-between max-w-4xl gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate" data-testid="text-app-title">
               JustAskIT
             </h1>
-            <p className="text-xs text-muted-foreground" data-testid="text-app-tagline">
+            <p className="text-xs text-muted-foreground hidden sm:block" data-testid="text-app-tagline">
               Powered by Dolphin Mistral AI
             </p>
           </div>
-          {messages.length > 0 && (
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setShowClearDialog(true)}
-              data-testid="button-clear-chat"
+              size="icon"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              data-testid="button-theme-toggle"
+              className="h-9 w-9"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear conversation
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
             </Button>
-          )}
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowClearDialog(true)}
+                data-testid="button-clear-chat"
+                className="hidden sm:flex"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear conversation
+              </Button>
+            )}
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowClearDialog(true)}
+                data-testid="button-clear-chat-mobile"
+                className="sm:hidden h-9 w-9"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -213,7 +242,7 @@ export default function ChatPage() {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto scroll-smooth"
       >
-        <div className="container mx-auto max-w-4xl px-4 py-6">
+        <div className="container mx-auto max-w-4xl px-3 sm:px-4 py-4 sm:py-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh]" data-testid="empty-state">
               <div className="mb-6">
@@ -222,15 +251,15 @@ export default function ChatPage() {
               <h2 className="text-2xl font-semibold mb-2 text-foreground">
                 Welcome to JustAskIT
               </h2>
-              <p className="text-muted-foreground mb-8 text-center">
+              <p className="text-muted-foreground mb-6 sm:mb-8 text-center px-4">
                 Ask me anything and I'll help you find answers
               </p>
-              <div className="flex flex-wrap gap-2 justify-center max-w-2xl">
+              <div className="flex flex-wrap gap-2 justify-center max-w-2xl px-4">
                 {sampleQuestions.map((question, index) => (
                   <button
                     key={index}
                     onClick={() => handleSampleClick(question)}
-                    className="px-4 py-2 rounded-full bg-muted hover-elevate active-elevate-2 text-sm text-foreground transition-colors"
+                    className="px-3 sm:px-4 py-2 rounded-full bg-muted hover-elevate active-elevate-2 text-xs sm:text-sm text-foreground transition-colors min-h-[36px]"
                     data-testid={`button-sample-${index}`}
                   >
                     {question}
@@ -345,7 +374,7 @@ export default function ChatPage() {
 
       {/* Input Area */}
       <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto max-w-4xl p-4">
+        <div className="container mx-auto max-w-4xl p-3 sm:p-4">
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -353,7 +382,7 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask me anything..."
-              className="min-h-[60px] max-h-[200px] resize-none rounded-2xl pr-14 text-base"
+              className="min-h-[60px] max-h-[200px] resize-none rounded-2xl pr-12 sm:pr-14 text-base"
               rows={3}
               disabled={isLoading}
               data-testid="input-message"
